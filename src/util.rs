@@ -50,7 +50,6 @@ impl<'de> Deserialize<'de> for Status {
     }
 }
 
-
 #[derive(Serialize, Deserialize)]
 pub struct RespData {
     status: Status,
