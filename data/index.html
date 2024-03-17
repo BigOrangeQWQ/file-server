@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- <link rel="stylesheet" href="style.css" /> -->
+    <!-- // Add the missing CSS file -->
+    <meta charset="UTF-8" />
+    <title>Orange Upload Server</title>
+  </head>
+  <style>
+    .upload-block {
+      color: #000;
+      -webkit-text-size-adjust: 100%;
+      font: 400 12px/18px Ubuntu, Helvetica, sans-serif;
+      direction: ltr;
+      visibility: visible;
+      box-sizing: border-box;
+      margin: 10px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-radius: 8px;
+      background: #149cd9;
+      border: 1px dashed #5ab9e4;
+      justify-content: space-between;
+      text-align: center;
+      padding: 20px 15px;
+    }
+
+    .token-desc {
+      color: rgba(26, 188, 156, 1);
+      margin-bottom: 20px;
+      /* padding: 20px 15px; */
+      /* border: 1px solid rgba(26, 188, 156,1.0); */
+      /* border-radius: 5px; */
+    }
+
+    .token-block {
+      align-items: center;
+      text-align: center;
+      align-items: center;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .token-button {
+      color: #000;
+      border: 1px solid white;
+      width: 100%;
+      margin: 5% 0;
+      border-radius: 8px;
+    }
+
+    .token-button:hover {
+      background: rgba(26, 188, 156, 1);
+      transition: all 0.2s;
+    }
+
+    .upload-button {
+      color: #000;
+      border: 2px solid white;
+      width: 50%;
+      padding: 15px;
+      border-radius: 15px;
+    }
+
+    .upload-button:hover {
+      background: rgba(52, 152, 219, 0.7);
+      transition: all 0.5s;
+    }
+
+    .upload-title {
+      color: white;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .upload-desc {
+      color: rgba(41, 128, 185, 0.9);
+    }
+
+    body {
+      background: #333;
+    }
+
+    .main {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      position: absolute;
+      width: 50%;
+      max-width: 1340px;
+      margin: 0 auto;
+      height: auto !important;
+      display: flex;
+      flex-direction: column;
+      min-width: 320px;
+    }
+  </style>
+  <body>
+    <div class="main">
+      <div class="upload-block">
+        <div class="upload-title">橙子物流</div>
+        <button type="file" class="upload-button">选择文件</button>
+        <div class="upload-desc">把文件拖拽到这里。</div>
+      </div>
+      <div class="token-block">
+          <ul>
+            <div class="token-desc">点击按钮复制对应链接</div>
+
+          </ul>
+      </div>
+    </div>
+  </body>
+  <script lang="ts">
+    const DOMAIN = "http://127.0.0.1:5800";
+
+    function handleFileSelect(event) {
+      const files = event.target.files;
+      const formData = new FormData();
+
+      for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]);
+      }
+
+      fetch(DOMAIN, {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // console.log(data);
+          // console.log(response.json())
+          const tokens = document.querySelector(".token-block");
+          data.data.forEach((token) => {
+            const item = document.createElement("button");
+            item.innerHTML = token;
+            item.className = "token-block";
+            console.log(tokens);
+            item.addEventListener("click", () => {
+              const textarea = document.createElement("textarea");
+              textarea.value = DOMAIN+ '/' + token;
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand("copy");
+              document.body.removeChild(textarea);
+            });
+            tokens.appendChild(item);
+          });
+        })
+        .catch((error) => {
+          // Handle any errors that occurred during the request
+          console.error(error);
+        });
+    }
+
+    const uploadButton = document.querySelector(".upload-button");
+    uploadButton.addEventListener("click", () => {
+      // console.log('click');
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.multiple = true;
+      fileInput.addEventListener("change", handleFileSelect);
+      fileInput.click();
+    });
+  </script>
+</html>
