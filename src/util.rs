@@ -1,5 +1,6 @@
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
+use chrono::{Days, Utc};
 
 pub fn random_chars(len: usize) -> String {
     const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -11,6 +12,11 @@ pub fn random_chars(len: usize) -> String {
             CHARSET[idx] as char
         })
         .collect()
+}
+
+pub fn next_day_time() -> i64 {
+    let now = Utc::now();
+    now.checked_add_days(Days::new(1)).unwrap().timestamp()
 }
 
 enum Status {

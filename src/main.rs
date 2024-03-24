@@ -3,10 +3,13 @@ mod db;
 
 use std::path::Path;
 use std::sync::OnceLock;
+use std::time::Duration;
 use db::TokenData;
 use salvo::fs::NamedFile;
 use salvo::prelude::*;
 
+use tokio::time::interval_at;
+use tokio::time::Instant;
 use util::RespData;
 use util::random_chars;
 
@@ -83,6 +86,17 @@ async fn main() {
 
     let _ = DATADB.set(TokenData::new());
 
+    tokio::spawn(
+        async {
+            let mut interval = interval_at(Instant::now(), Duration::from_secs(60 * 60 * 12));
+            loop {
+                interval.tick().await;
+                get_db().delete_timeout_key();
+            }
+        }
+    );
+
+
     let router = Router::new()
         .get(index)
         .post(upload)
@@ -93,3 +107,5 @@ async fn main() {
     let acceptor = TcpListener::new("127.0.0.1:5800").bind().await;
     Server::new(acceptor).serve(router).await;
 }
+
+
