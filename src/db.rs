@@ -1,3 +1,5 @@
+use std::fs::remove_file;
+
 use chrono::Utc;
 use redb::{Database, ReadableTable, TableDefinition};
 
@@ -59,6 +61,7 @@ impl TokenData {
                 |result: Result<(redb::AccessGuard<'_, &str>, redb::AccessGuard<'_, i64>), redb::StorageError>| {
                     if let Ok((key, value)) = result {
                         if value.value() < Utc::now().timestamp() {
+                            remove_file(format!("data/{}", self.get(key.value()))).unwrap();
                             self.delete_key(key.value());
                         }
                     }
